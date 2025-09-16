@@ -1,0 +1,196 @@
+<!DOCTYPE html>
+<html lang="en"><head>
+<meta charset="utf-8"/>
+<link crossorigin="" href="https://fonts.gstatic.com/" rel="preconnect"/>
+<link as="style" href="https://fonts.googleapis.com/css2?display=swap&amp;family=Inter%3Awght%40400%3B500%3B700%3B900&amp;family=Noto+Sans%3Awght%40400%3B500%3B700%3B900" onload="this.rel='stylesheet'" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined" rel="stylesheet"/>
+<title>Stitch Design</title>
+<link href="data:image/x-icon;base64," rel="icon" type="image/x-icon"/>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head>
+<body class="bg-black">
+<div class="relative flex h-screen w-full flex-col bg-black dark justify-between group/design-root overflow-hidden" style='font-family: Inter, "Noto Sans", sans-serif;'>
+<div class="flex flex-col h-full p-4">
+<div class="flex-grow flex flex-col justify-end items-end pb-4">
+<p id="display" class="text-white text-7xl font-light leading-tight tracking-tighter">0</p>
+</div>
+<div class="grid grid-cols-4 gap-3">
+<button  data-action="clear" class="btn flex items-center justify-center rounded-full h-20 w-20 bg-gray-400 text-black text-3xl font-medium">
+            AC
+          </button>
+<button  data-action="plus-minus" class="btn flex items-center justify-center rounded-full h-20 w-20 bg-gray-400 text-black text-3xl font-medium">
+            ±
+          </button>
+<button data-action="percent" class="btn flex items-center justify-center rounded-full h-20 w-20 bg-gray-400 text-black text-3xl font-medium">
+            %
+          </button>
+<button  class="operator flex items-center justify-center rounded-full h-20 w-20 bg-orange-500 text-white text-4xl font-medium">
+            ÷
+          </button>
+<button  class="number flex items-center justify-center rounded-full h-20 w-20 bg-gray-800 text-white text-3xl font-medium">
+            7
+          </button>
+<button  class="number flex items-center justify-center rounded-full h-20 w-20 bg-gray-800 text-white text-3xl font-medium">
+            8
+          </button>
+<button class="number flex items-center justify-center rounded-full h-20 w-20 bg-gray-800 text-white text-3xl font-medium">
+            9
+          </button>
+<button class="operator flex items-center justify-center rounded-full h-20 w-20 bg-orange-500 text-white text-4xl font-medium">
+            ×
+          </button>
+<button class="number flex items-center justify-center rounded-full h-20 w-20 bg-gray-800 text-white text-3xl font-medium">
+            4
+          </button>
+<button class="number flex items-center justify-center rounded-full h-20 w-20 bg-gray-800 text-white text-3xl font-medium">
+            5
+          </button>
+<button class="number flex items-center justify-center rounded-full h-20 w-20 bg-gray-800 text-white text-3xl font-medium">
+            6
+          </button>
+<button class="operator flex items-center justify-center rounded-full h-20 w-20 bg-orange-500 text-white text-4xl font-medium">
+            -
+          </button>
+<button class="number flex items-center justify-center rounded-full h-20 w-20 bg-gray-800 text-white text-3xl font-medium">
+            1
+          </button>
+<button class="number flex items-center justify-center rounded-full h-20 w-20 bg-gray-800 text-white text-3xl font-medium">
+            2
+          </button>
+<button class="number flex items-center justify-center rounded-full h-20 w-20 bg-gray-800 text-white text-3xl font-medium">
+            3
+          </button>
+<button class="operator flex items-center justify-center rounded-full h-20 w-20 bg-orange-500 text-white text-4xl font-medium">
+            +
+          </button>
+<button class="number col-span-2 flex items-center justify-start pl-8 rounded-full h-20 bg-gray-800 text-white text-3xl font-medium">
+            0
+          </button>
+<button class="decimal flex items-center justify-center rounded-full h-20 w-20 bg-gray-800 text-white text-3xl font-medium">
+            .
+          </button>
+<button class="equals flex items-center justify-center rounded-full h-20 w-20 bg-orange-500 text-white text-4xl font-medium">
+            =
+          </button>
+</div>
+<div class="h-8"></div>
+</div>
+</div>
+<script>
+  const display = document.getElementById('display');
+  const buttons = document.querySelectorAll('button');
+
+  let currentInput = '';
+  let previousInput = '';
+  let operator = null;
+  let shouldResetInput = false;
+
+  // Create a span to show the operator next to the display
+  let operatorSpan = document.createElement('span');
+  operatorSpan.style.fontSize = '2rem';
+  operatorSpan.style.color = '#f59e42';
+  operatorSpan.style.marginLeft = '16px';
+  display.parentNode.appendChild(operatorSpan);
+
+  function updateDisplay() {
+    display.textContent = currentInput || '0';
+    operatorSpan.textContent = operator ? operator : '';
+  }
+
+  buttons.forEach(button => {
+    button.addEventListener('click', () => {
+      const value = button.textContent.trim();
+      const action = button.dataset.action;
+
+      if (button.classList.contains('number')) {
+        if (shouldResetInput) {
+          currentInput = '';
+          shouldResetInput = false;
+        }
+        // Prevent multiple leading zeros
+        if (currentInput === '0') currentInput = '';
+        currentInput += value;
+        updateDisplay();
+      }
+
+      else if (button.classList.contains('decimal')) {
+        if (shouldResetInput) {
+          currentInput = '0';
+          shouldResetInput = false;
+        }
+        if (!currentInput.includes('.')) {
+          if (currentInput === '') currentInput = '0';
+          currentInput += '.';
+        }
+        updateDisplay();
+      }
+
+      else if (button.classList.contains('operator')) {
+        if (currentInput === '') return;
+        if (previousInput && operator && !shouldResetInput) {
+          compute();
+        } else {
+          previousInput = currentInput;
+        }
+        operator = value;
+        shouldResetInput = true;
+        updateDisplay();
+      }
+
+      else if (action === 'clear') {
+        currentInput = '';
+        previousInput = '';
+        operator = null;
+        shouldResetInput = false;
+        updateDisplay();
+      }
+
+      else if (action === 'percent') {
+        if (currentInput) {
+          currentInput = (parseFloat(currentInput) / 100).toString();
+          updateDisplay();
+        }
+      }
+
+      else if (action === 'plus-minus') {
+        if (currentInput) {
+          currentInput = (parseFloat(currentInput) * -1).toString();
+          updateDisplay();
+        }
+      }
+
+      else if (button.classList.contains('equals')) {
+        if (operator && previousInput !== '' && currentInput !== '') {
+          compute();
+          operator = null;
+          updateDisplay();
+        }
+      }
+    });
+  });
+
+  function compute() {
+    const prev = parseFloat(previousInput);
+    const curr = parseFloat(currentInput);
+    let result = 0;
+
+    if (isNaN(prev) || isNaN(curr)) return;
+
+    if (operator === '+') result = prev + curr;
+    else if (operator === '-') result = prev - curr;
+    else if (operator === '×') result = prev * curr;
+    else if (operator === '÷') result = curr !== 0 ? prev / curr : 'Error';
+
+    currentInput = result.toString();
+    previousInput = currentInput;
+    shouldResetInput = true;
+  }
+  updateDisplay();
+</script>
+</body>
+</html>
